@@ -12,7 +12,10 @@
     }
   ],
   "require": {
-    "php": ">=7.0"
+    "php": ">=7.0",
+    "doctrine/instantiator": "^1.0",
+    "doctrine/cache": "^1.6",
+    "webmozart/assert": "^1.2"
   },
   "require-dev": {
     "codeclimate/php-test-reporter": "dev-master",
