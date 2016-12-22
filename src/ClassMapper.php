@@ -18,6 +18,7 @@
 
 namespace N86io\Di;
 
+use N86io\Di\Exception\ClassMapperException;
 use Webmozart\Assert\Assert;
 
 /**
@@ -47,6 +48,7 @@ class ClassMapper
     {
         Assert::allClassExists([$sourceClass, $targetClass]);
         $this->mappings[$sourceClass] = $targetClass;
+        $this->checkForLoop($sourceClass);
 
         return $this;
     }
@@ -84,5 +86,22 @@ class ClassMapper
         }
 
         return $this->map($this->mappings[$sourceClass]);
+    }
+
+    /**
+     * @param string $className
+     * @param array  $loopTemp
+     *
+     * @throws ClassMapperException
+     */
+    protected function checkForLoop(string $className, array $loopTemp = [])
+    {
+        if (array_search($className, $loopTemp) !== false) {
+            throw new ClassMapperException('Invalid class-mapping. There is a loop in it.');
+        }
+        $loopTemp[] = $className;
+        if (isset($this->mappings[$className])) {
+            $this->checkForLoop($this->mappings[$className], $loopTemp);
+        }
     }
 }

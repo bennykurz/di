@@ -19,6 +19,7 @@
 namespace N86io\Di\Tests\Unit;
 
 use N86io\Di\ClassMapper;
+use N86io\Di\Exception\ClassMapperException;
 use N86io\Di\Instantiator;
 use N86io\Di\ObjectFactory;
 use PHPUnit\Framework\TestCase;
@@ -28,20 +29,37 @@ use PHPUnit\Framework\TestCase;
  */
 class ClassMapperTest extends TestCase
 {
-    public function test()
-    {
-        $classMapper = new ClassMapper;
+    /**
+     * @var ClassMapper
+     */
+    protected $classMapper;
 
-        $classMapper->addMappings([
+    public function setUp()
+    {
+        $this->classMapper = new ClassMapper;
+        $this->classMapper->addMappings([
             self::class        => ClassMapper::class,
             ClassMapper::class => Instantiator::class
         ]);
-        $this->assertEquals(Instantiator::class, $classMapper->map(self::class));
-        $this->assertEquals(Instantiator::class, $classMapper->map(ClassMapper::class));
+    }
 
-        $classMapper->addMapping(Instantiator::class, ObjectFactory::class);
-        $this->assertEquals(ObjectFactory::class, $classMapper->map(self::class));
-        $this->assertEquals(ObjectFactory::class, $classMapper->map(ClassMapper::class));
-        $this->assertEquals(ObjectFactory::class, $classMapper->map(Instantiator::class));
+    public function test()
+    {
+        $this->assertEquals(Instantiator::class, $this->classMapper->map(self::class));
+        $this->assertEquals(Instantiator::class, $this->classMapper->map(ClassMapper::class));
+
+        $this->classMapper->addMapping(Instantiator::class, ObjectFactory::class);
+        $this->assertEquals(ObjectFactory::class, $this->classMapper->map(self::class));
+        $this->assertEquals(ObjectFactory::class, $this->classMapper->map(ClassMapper::class));
+        $this->assertEquals(ObjectFactory::class, $this->classMapper->map(Instantiator::class));
+    }
+
+    public function testException()
+    {
+        $this->expectException(ClassMapperException::class);
+        $this->classMapper->addMappings([
+            Instantiator::class  => ObjectFactory::class,
+            ObjectFactory::class => self::class
+        ]);
     }
 }
