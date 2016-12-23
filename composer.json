@@ -29,7 +29,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "N86io\\Di\\Tests\\Unit\\": "build/tests/unit"
+      "N86io\\Di\\Tests\\Unit\\": "build/tests/unit",
+      "N86io\\Di\\Tests\\Stuff\\": "build/tests/stuff"
     }
   },
   "extra": {
