@@ -18,9 +18,14 @@
 
 namespace N86io\Di\Tests\Stuff;
 
+use N86io\Di\Singleton;
+
 /**
  * @author Viktor Firus <v@n86.io>
  */
-class TestClass3 extends TestClass2
+class TestClass8 implements TestClass9Interface, Singleton
 {
+    public function __construct()
+    {
+    }
 }

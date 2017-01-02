@@ -20,7 +20,8 @@ namespace N86io\Di\Tests\Stuff;
 
 /**
  * @author Viktor Firus <v@n86.io>
+ * @since  1.0.0
  */
-class TestClass3 extends TestClass2
+class TestClass9
 {
 }

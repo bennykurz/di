@@ -21,23 +21,39 @@ namespace N86io\Di\Tests\Stuff;
 /**
  * @author Viktor Firus <v@n86.io>
  */
-class TestClass
+class TestClass implements TestClassInterface
 {
     /**
      * @inject
      * @var TestClass2
      */
-    protected $test2;
+    public $test2;
 
     /**
      * @var TestClass3
      */
-    protected $test3;
+    public $test3;
 
     /**
      * @var TestClass4
      */
-    protected $test4;
+    public $test4;
+
+    /**
+     * @return TestClass2
+     */
+    public function getTest2()
+    {
+        return $this->test2;
+    }
+
+    /**
+     * @return TestClass3
+     */
+    public function getTest3()
+    {
+        return $this->test3;
+    }
 
     /**
      * @inject

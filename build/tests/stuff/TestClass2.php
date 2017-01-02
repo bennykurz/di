@@ -18,14 +18,13 @@
 
 namespace N86io\Di\Tests\Stuff;
 
-use N86io\Di\Singleton;
-
 /**
  * @author Viktor Firus <v@n86.io>
  */
-class TestClass2 implements Singleton
+class TestClass2 implements TestClass2Interface
 {
-    public function __construct()
-    {
-    }
+    /**
+     * @var string
+     */
+    public $value;
 }

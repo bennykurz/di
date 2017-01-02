@@ -21,6 +21,6 @@ namespace N86io\Di\Tests\Stuff;
 /**
  * @author Viktor Firus <v@n86.io>
  */
-class TestClass3 extends TestClass2
+interface TestClass9Interface
 {
 }
