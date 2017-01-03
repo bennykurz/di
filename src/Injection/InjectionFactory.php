@@ -66,7 +66,6 @@ class InjectionFactory
         $result = [];
         foreach ($methods as $method) {
             Assert::isInstanceOf($method, ReflectionMethod::class);
-            $docComment = $method->getParsedDocComment();
             if (self::isInjectionMethod($method)) {
                 $type = self::getTypeFromParam($method);
                 if ($type !== '') {
@@ -74,6 +73,7 @@ class InjectionFactory
                     $result[] = $injection;
                     continue;
                 }
+                $docComment = $method->getParsedDocComment();
                 $type = self::getTypeFromDocComment($docComment, $method->getParameters()[0]->getName());
                 $injection = new MethodInjection($method->getName(), $type);
                 $result[] = $injection;
@@ -92,10 +92,8 @@ class InjectionFactory
      */
     private static function isInjectionMethod(ReflectionMethod $method)
     {
-        $docComment = $method->getParsedDocComment();
-
         return (
-                ($docComment->hasTag('inject') && substr($method->getName(), 0, 3) === 'set') ||
+                (substr($method->getName(), 0, 3) === 'set' && $method->getParsedDocComment()->hasTag('inject')) ||
                 substr($method->getName(), 0, 6) === 'inject'
             ) &&
             $method->isPublic();
