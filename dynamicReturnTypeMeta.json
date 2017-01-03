@@ -6,7 +6,12 @@
       "position": 0
     },
     {
-      "class": "\\N86io\\Di\\Container\\ContainerInterface",
+      "class": "\\N86io\\Di\\ContainerInterface",
+      "method": "get",
+      "position": 0
+    },
+    {
+      "class": "\\N86io\\Di\\Container",
       "method": "get",
       "position": 0
     }
