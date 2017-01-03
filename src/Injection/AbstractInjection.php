@@ -18,8 +18,6 @@
 
 namespace N86io\Di\Injection;
 
-use Webmozart\Assert\Assert;
-
 /**
  * @author Viktor Firus <v@n86.io>
  * @since  1.0.0
@@ -35,7 +33,6 @@ abstract class AbstractInjection implements InjectionInterface
 
     public function __construct(string $type)
     {
-        Assert::classExists($type);
         $this->type = $type;
     }
 
