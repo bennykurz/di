@@ -28,8 +28,9 @@ interface ContainerInterface extends Singleton
      * Instantiate specified class.
      *
      * @param string $className
+     * @param array  $params
      *
      * @return object
      */
-    public function get(string $className);
+    public function get(string $className, ...$params);
 }
