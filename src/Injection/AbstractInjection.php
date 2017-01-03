@@ -18,6 +18,8 @@
 
 namespace N86io\Di\Injection;
 
+use N86io\Di\ClassInterfaceNameValidator;
+
 /**
  * @author Viktor Firus <v@n86.io>
  * @since  1.0.0
@@ -33,6 +35,7 @@ abstract class AbstractInjection implements InjectionInterface
 
     public function __construct(string $type)
     {
+        ClassInterfaceNameValidator::validate($type);
         $this->type = $type;
     }
 
