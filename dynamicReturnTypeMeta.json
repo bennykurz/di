@@ -1,0 +1,14 @@
+{
+  "methodCalls": [
+    {
+      "class": "\\N86io\\Di\\SingletonContainerInterface",
+      "method": "get",
+      "position": 0
+    },
+    {
+      "class": "\\N86io\\Di\\Container\\ContainerInterface",
+      "method": "get",
+      "position": 0
+    }
+  ]
+}
