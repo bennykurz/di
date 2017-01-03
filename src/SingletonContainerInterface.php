@@ -50,6 +50,7 @@ interface SingletonContainerInterface
      *
      * @param object $object
      *
+     * @return SingletonContainerInterface
      * @throws SingletonContainerException
      */
     public function set($object);

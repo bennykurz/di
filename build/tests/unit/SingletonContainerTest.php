@@ -21,7 +21,7 @@ namespace N86io\Di\Tests\Unit\Singleton;
 use N86io\Di\Exception\SingletonContainerException;
 use N86io\Di\SingletonContainer;
 use N86io\Di\SingletonContainerInterface;
-use N86io\Di\Tests\Unit\ClassMapperTest;
+use N86io\Di\Tests\Unit\ClassResolverTest;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -45,7 +45,7 @@ class SingletonContainerTest extends TestCase
         $this->singletonContainer->set(new self);
         $this->assertInstanceOf(self::class, $this->singletonContainer->get(self::class));
         $this->assertTrue($this->singletonContainer->has(self::class));
-        $this->assertFalse($this->singletonContainer->has(ClassMapperTest::class));
+        $this->assertFalse($this->singletonContainer->has(ClassResolverTest::class));
     }
 
     public function testException1()

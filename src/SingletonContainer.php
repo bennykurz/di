@@ -68,9 +68,10 @@ class SingletonContainer implements SingletonContainerInterface
      *
      * @param object $object
      *
+     * @return SingletonContainerInterface
      * @throws SingletonContainerException
      */
-    public function set($object)
+    public function set($object): SingletonContainerInterface
     {
         Assert::object($object);
         $className = get_class($object);
@@ -78,5 +79,7 @@ class SingletonContainer implements SingletonContainerInterface
             throw  new SingletonContainerException('Can\'t override singleton instance of "' . $className . '".');
         }
         $this->singletons[$className] = $object;
+
+        return $this;
     }
 }
