@@ -22,6 +22,6 @@ namespace N86io\Di\Exception;
  * @author Viktor Firus <v@n86.io>
  * @since  1.0.0
  */
-class ClassMapperException extends \Exception
+class ClassResolverException extends \Exception
 {
 }
