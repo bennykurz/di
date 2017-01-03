@@ -16,15 +16,18 @@
  * along with N86io/Di or see <http://www.gnu.org/licenses/>.
  */
 
-namespace N86io\Di\Tests\Unit;
+namespace N86io\Di\Tests\Unit\Definition;
 
 use Doctrine\Common\Cache\ArrayCache;
+use N86io\Di\Definition\Definition;
 use N86io\Di\Definition\DefinitionFactory;
-use N86io\Di\Exception\DefinitionFactoryException;
+use N86io\Di\Definition\DefinitionInterface;
+use N86io\Di\Exception\InjectionFactoryException;
 use N86io\Di\Injection\MethodInjection;
 use N86io\Di\Injection\PropertyInjection;
 use N86io\Di\Tests\Stuff\TestClass;
-use N86io\Di\Tests\Stuff\TestClass2;
+use N86io\Di\Tests\Stuff\TestClass8;
+use N86io\Di\Tests\Stuff\TestClass9;
 use N86io\Di\Tests\Stuff\TestClassError;
 use N86io\Di\Tests\Stuff\TestClassError2;
 use N86io\Di\Tests\Stuff\TestClassError3;
@@ -50,8 +53,8 @@ class DefinitionFactoryTest extends TestCase
     public function test()
     {
         $testClass = $this->definitionFactory->get(TestClass::class);
-        $testClass2_1 = $this->definitionFactory->get(TestClass2::class);
-        $testClass2_2 = $this->definitionFactory->get(TestClass2::class);
+        $testClass8_1 = $this->definitionFactory->get(TestClass8::class);
+        $testClass8_2 = $this->definitionFactory->get(TestClass8::class);
 
         $this->assertEquals(TestClass::class, $testClass->getClassName());
         $this->assertFalse($testClass->isSingleton());
@@ -60,31 +63,16 @@ class DefinitionFactoryTest extends TestCase
         $this->assertInstanceOf(MethodInjection::class, $testClass->getInjections()[1]);
         $this->assertInstanceOf(MethodInjection::class, $testClass->getInjections()[2]);
 
-        $this->assertEquals(TestClass2::class, $testClass2_1->getClassName());
-        $this->assertEquals(TestClass2::class, $testClass2_2->getClassName());
-        $this->assertTrue($testClass2_1->isSingleton());
-        $this->assertTrue($testClass2_1->hasConstructor());
-        $this->assertEquals([], $testClass2_1->getInjections());
-    }
+        $this->assertEquals(TestClass8::class, $testClass8_1->getClassName());
+        $this->assertEquals(TestClass8::class, $testClass8_2->getClassName());
+        $this->assertTrue($testClass8_1->isSingleton());
+        $this->assertTrue($testClass8_1->hasConstructor());
+        $this->assertEquals([], $testClass8_1->getInjections());
 
-    public function testException1()
-    {
-        $this->expectException(DefinitionFactoryException::class);
-        $this->expectExceptionCode(1482512265);
-        $this->definitionFactory->get(TestClassError::class);
-    }
-
-    public function testException2()
-    {
-        $this->expectException(DefinitionFactoryException::class);
-        $this->expectExceptionCode(1482512242);
-        $this->definitionFactory->get(TestClassError2::class);
-    }
-
-    public function testException3()
-    {
-        $this->expectException(DefinitionFactoryException::class);
-        $this->expectExceptionCode(1482512248);
-        $this->definitionFactory->get(TestClassError3::class);
+        $definition = new Definition(TestClass9::class, DefinitionInterface::PROTOTYPE);
+        $cache = new ArrayCache;
+        $cache->save(TestClass9::class, $definition);
+        $this->definitionFactory->overrideCache($cache);
+        $this->assertEquals(TestClass9::class, $this->definitionFactory->get(TestClass9::class)->getClassName());
     }
 }

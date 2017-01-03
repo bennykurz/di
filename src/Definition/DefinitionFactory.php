@@ -18,13 +18,9 @@
 namespace N86io\Di\Definition;
 
 use Doctrine\Common\Cache\Cache;
-use N86io\Di\Exception\DefinitionFactoryException;
-use N86io\Di\Injection\MethodInjection;
-use N86io\Di\Injection\PropertyInjection;
+use N86io\Di\Injection\InjectionFactory;
 use N86io\Di\Singleton;
-use N86io\Reflection\DocComment;
 use N86io\Reflection\ReflectionClass;
-use N86io\Reflection\ReflectionMethod;
 
 /**
  * @author Viktor Firus <v@n86.io>
@@ -37,7 +33,12 @@ class DefinitionFactory implements Singleton
      *
      * @var Cache
      */
-    protected $cache;
+    private $cache;
+
+    /**
+     * @var DefinitionInterface[]
+     */
+    private $arrayStorage = [];
 
     /**
      * @param Cache $cache
@@ -48,38 +49,66 @@ class DefinitionFactory implements Singleton
     }
 
     /**
+     * Override cache from DefinitionFactory. All cache-entries from old cache will not be transferred to new cache.
+     *
+     * @param Cache $cache
+     */
+    public function overrideCache(Cache $cache)
+    {
+        $this->cache = $cache;
+    }
+
+    /**
      * Returns class definition. At first time it will be initially created and saved in cache.
      *
      * @param string $className
      *
      * @return DefinitionInterface
-     * @throws DefinitionFactoryException
      */
-    public function get($className): DefinitionInterface
+    public function get(string $className): DefinitionInterface
     {
-        if (!$this->cache->contains($className)) {
-            $reflectionClass = new ReflectionClass($className);
+        if (isset($this->arrayStorage[$className])) {
+            return $this->arrayStorage[$className];
+        }
 
-            $interfaces = $reflectionClass->getInterfaceNames();
-            $isSingleton = array_search(Singleton::class, $interfaces) !== false;
-            $definition = new Definition(
-                $className,
-                $isSingleton ? Definition::SINGLETON : Definition::PROTOTYPE
-            );
-
-            $this->addPropertyInjections($definition, $reflectionClass);
-            $this->addMethodInjections($definition, $reflectionClass);
-
-            if ($reflectionClass->hasMethod('__construct')) {
-                $definition->setConstructor(true);
-            }
-
-            $this->cache->save($className, $definition);
+        if ($this->cache->contains($className)) {
+            $definition = $this->cache->fetch($className);
+            $this->arrayStorage[$className] = $definition;
 
             return $definition;
         }
 
-        return $this->cache->fetch($className);
+        $definition = $this->buildDefinition($className);
+        $this->arrayStorage[$className] = $definition;
+        $this->cache->save($className, $definition);
+
+        return $definition;
+    }
+
+    /**
+     * @param string $className
+     *
+     * @return DefinitionInterface
+     */
+    private function buildDefinition(string $className): DefinitionInterface
+    {
+        $reflectionClass = new ReflectionClass($className);
+
+        $interfaces = $reflectionClass->getInterfaceNames();
+        $isSingleton = array_search(Singleton::class, $interfaces) !== false;
+        $definition = new Definition(
+            $className,
+            $isSingleton ? Definition::SINGLETON : Definition::PROTOTYPE
+        );
+
+        $this->addPropertyInjections($definition, $reflectionClass);
+        $this->addMethodInjections($definition, $reflectionClass);
+
+        if ($reflectionClass->hasMethod('__construct')) {
+            $definition->setConstructor(true);
+        }
+
+        return $definition;
     }
 
     /**
@@ -90,72 +119,11 @@ class DefinitionFactory implements Singleton
      */
     private function addMethodInjections(DefinitionInterface $definition, ReflectionClass $reflectionClass)
     {
-        $methods = $reflectionClass->getMethods();
-        foreach ($methods as $method) {
-            $docComment = $method->getParsedDocComment();
-            if (($docComment->hasTag('inject') && substr($method->getName(), 0, 3) === 'set') ||
-                substr($method->getName(), 0, 6) === 'inject'
-            ) {
-                $type = $this->getTypeFromParam($method);
-                if ($type !== '') {
-                    $injection = new MethodInjection($method->getName(), $type);
-                    $definition->addInjection($injection);
-                    continue;
-                }
-                $type = $this->getTypeFromDocComment($docComment, $method->getParameters()[0]->getName());
-                $injection = new MethodInjection($method->getName(), $type);
-                $definition->addInjection($injection);
-            }
-        }
-    }
+        $methodInjections = InjectionFactory::createMethodInjections($reflectionClass->getMethods());
 
-    /**
-     * Get object type for injection from method parameter.
-     *
-     * @param ReflectionMethod $method
-     *
-     * @return string
-     * @throws DefinitionFactoryException
-     */
-    private function getTypeFromParam(ReflectionMethod $method): string
-    {
-        if ($method->getNumberOfParameters() < 1 || $method->getNumberOfParameters() > 1) {
-            throw new DefinitionFactoryException(
-                'Invalid count of parameter from injection method, it should have only 1 parameter.',
-                1482512265
-            );
+        foreach ($methodInjections as $methodInjection) {
+            $definition->addInjection($methodInjection);
         }
-
-        return (string)$method->getParameters()[0]->getType();
-    }
-
-    /**
-     * Get object type for injection from doc-comment.
-     *
-     * @param DocComment $docComment
-     * @param string     $parameterName
-     *
-     * @return string
-     * @throws DefinitionFactoryException
-     */
-    private function getTypeFromDocComment(DocComment $docComment, string $parameterName): string
-    {
-        $paramTag = $docComment->getTagsByName('param');
-        if (count($paramTag) < 1 || count($paramTag) > 1) {
-            throw new DefinitionFactoryException(
-                'Invalid count of param definitions in doc-comment.',
-                1482512242
-            );
-        }
-        $paramTagValue = ' ' . $paramTag[0] . ' ';
-        if (strpos($paramTagValue, ' $' . $parameterName . ' ') === false) {
-            throw new DefinitionFactoryException(
-                'Can\'t found type-definition for $' . $parameterName . ' in doc-comment',
-                1482512248
-            );
-        }
-
-        return explode(' ', trim($paramTagValue))[0];
     }
 
     /**
@@ -166,13 +134,10 @@ class DefinitionFactory implements Singleton
      */
     private function addPropertyInjections(DefinitionInterface $definition, ReflectionClass $reflectionClass)
     {
-        $properties = $reflectionClass->getProperties();
-        foreach ($properties as $property) {
-            $docComment = $property->getParsedDocComment();
-            if ($docComment->hasTag('inject')) {
-                $injection = new PropertyInjection($property->getName(), $docComment->getTagsByName('var')[0]);
-                $definition->addInjection($injection);
-            }
+        $propertyInjections = InjectionFactory::createPropertyInjections($reflectionClass->getProperties());
+
+        foreach ($propertyInjections as $propertyInjection) {
+            $definition->addInjection($propertyInjection);
         }
     }
 }

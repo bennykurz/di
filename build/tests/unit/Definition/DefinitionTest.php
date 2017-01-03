@@ -16,7 +16,7 @@
  * along with N86io/Di or see <http://www.gnu.org/licenses/>.
  */
 
-namespace N86io\Di\Tests\Unit;
+namespace N86io\Di\Tests\Unit\Definition;
 
 use N86io\Di\Definition\Definition;
 use N86io\Di\Definition\DefinitionInterface;
@@ -34,7 +34,7 @@ class DefinitionTest extends TestCase
         $definition = new Definition(self::class, DefinitionInterface::PROTOTYPE);
         $definition->setConstructor(false);
         /** @var InjectionInterface $injection */
-        $injection = $this->createMock(InjectionInterface::class);
+        $injection = \Mockery::mock(InjectionInterface::class);
         $definition->addInjection($injection);
 
         $this->assertEquals(self::class, $definition->getClassName());
@@ -57,5 +57,10 @@ class DefinitionTest extends TestCase
         $this->assertEquals(self::class, $definition->getClassName());
         $this->assertTrue($definition->isSingleton());
         $this->assertFalse($definition->hasConstructor());
+    }
+
+    public function tearDown()
+    {
+        \Mockery::close();
     }
 }
