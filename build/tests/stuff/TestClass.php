@@ -72,4 +72,12 @@ class TestClass implements TestClassInterface
     {
         $this->test4 = $testClass4;
     }
+
+    /**
+     * @param TestClass4 $testClass4
+     */
+    private function injectTest5($testClass4)
+    {
+        $this->test4 = $testClass4;
+    }
 }

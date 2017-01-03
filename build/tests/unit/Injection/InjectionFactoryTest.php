@@ -42,6 +42,7 @@ class InjectionFactoryTest extends TestCase
         $methodInjections = InjectionFactory::createMethodInjections($reflection->getMethods());
         $this->assertInstanceOf(MethodInjection::class, $methodInjections[0]);
         $this->assertInstanceOf(MethodInjection::class, $methodInjections[1]);
+        $this->assertArrayNotHasKey(2, $methodInjections);
 
         $propertyInjections = InjectionFactory::createPropertyInjections($reflection->getProperties());
         $this->assertInstanceOf(PropertyInjection::class, $propertyInjections[0]);
