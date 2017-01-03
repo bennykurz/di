@@ -43,7 +43,10 @@ class InjectionFactory
         foreach ($properties as $property) {
             $docComment = $property->getParsedDocComment();
             if ($docComment->hasTag('inject')) {
-                $injection = new PropertyInjection($property->getName(), $docComment->getTagsByName('var')[0]);
+                $injection = new PropertyInjection(
+                    $property->getName(),
+                    self::removeBackslashAtFirstPos($docComment->getTagsByName('var')[0])
+                );
                 $result[] = $injection;
             }
         }
@@ -144,6 +147,18 @@ class InjectionFactory
             );
         }
 
-        return explode(' ', trim($paramTagValue))[0];
+        return self::removeBackslashAtFirstPos(explode(' ', trim($paramTagValue))[0]);
+    }
+
+    /**
+     * Remove slash at first position, if available.
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    private static function removeBackslashAtFirstPos(string $string)
+    {
+        return substr($string, 0, 1) === '\\' ? substr($string, 1) : $string;
     }
 }

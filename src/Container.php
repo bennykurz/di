@@ -104,6 +104,7 @@ class Container implements ContainerInterface
      */
     public function get(string $className, ...$params)
     {
+        ClassInterfaceNameValidator::validate($className);
         $className = self::$singletonContainer->get(ClassResolver::class)->resolve($className);
         if (self::$singletonContainer->has($className)) {
             return self::$singletonContainer->get($className);

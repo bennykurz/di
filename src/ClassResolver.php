@@ -42,6 +42,7 @@ class ClassResolver implements ClassResolverInterface
      */
     public function resolve(string $sourceClass): string
     {
+        ClassInterfaceNameValidator::validate($sourceClass);
         $sourceClass = $this->resolveInterface($sourceClass);
         $targetClass = $this->map($sourceClass);
 
@@ -59,8 +60,8 @@ class ClassResolver implements ClassResolverInterface
      */
     public function addMapping(string $sourceClass, string $targetClass): ClassResolver
     {
-        $this->classOrInterfaceExist($sourceClass);
-        $this->classOrInterfaceExist($targetClass);
+        ClassInterfaceNameValidator::validate($sourceClass);
+        ClassInterfaceNameValidator::validate($targetClass);
         if (!is_subclass_of($targetClass, $sourceClass)) {
             throw new ClassResolverException(
                 '"' . $targetClass . '" should be a subclass of "' . $sourceClass . '".',
@@ -123,7 +124,6 @@ class ClassResolver implements ClassResolverInterface
      */
     private function map(string $sourceClass): string
     {
-        $this->classOrInterfaceExist($sourceClass);
         if ($this->hasMap($sourceClass)) {
             return $this->map($this->mappings[$sourceClass]);
         }
@@ -141,19 +141,5 @@ class ClassResolver implements ClassResolverInterface
     private function hasMap(string $sourceClass): bool
     {
         return isset($this->mappings[$sourceClass]);
-    }
-
-    /**
-     * Throw an exception, if given class- or interface-name doesn't exist.
-     *
-     * @param string $name
-     *
-     * @throws ClassResolverException
-     */
-    private function classOrInterfaceExist(string $name)
-    {
-        if (!interface_exists($name) && !class_exists($name)) {
-            throw new ClassResolverException('Class or interface "' . $name . '" not found.', 1482825252);
-        }
     }
 }

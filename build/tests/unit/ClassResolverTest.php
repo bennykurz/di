@@ -86,12 +86,4 @@ class ClassResolverTest extends TestCase
 
         $this->classResolver->resolve(TestClass9Interface::class);
     }
-
-    public function testException3()
-    {
-        $this->expectException(ClassResolverException::class);
-        $this->expectExceptionCode(1482825252);
-
-        $this->classResolver->resolve('Test');
-    }
 }

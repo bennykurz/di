@@ -59,6 +59,7 @@ class SingletonContainer implements SingletonContainerInterface
     public function has(string $className): bool
     {
         Assert::classExists($className);
+        ClassInterfaceNameValidator::validate($className);
 
         return !empty($this->singletons[$className]);
     }
